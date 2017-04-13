@@ -65,8 +65,8 @@ void loop(void)
   int left = 0;
   int right = 0;
   
-  int ch3;//kurok left_ (up_down) min = 1240 ; max = 2050 ; avr = (1672-1693)
-  int ch1;//kurok right (left_right) min = 1200 ; max = 2050 ; avr = (1682-1700)
+  int ch3;//kurok left_ (up_down) min = 1240 ; max = 2050 ; avr = (1672-1693) (1622-1743)
+  int ch1;//kurok right (left_right) min = 1200 ; max = 2050 ; avr = (1682-1700) (1632-1750)
    
    digitalWrite(but, HIGH); 
  while (digitalRead(but) == 1) {
@@ -82,8 +82,8 @@ void loop(void)
       Serial.print("Chanel_1:");
       Serial.println(ch1);
       
-      if (ch3 > 1693){
-        mosh = map(ch3,1694,2050,0,300);
+      if (ch3 > 1743){
+        mosh = map(ch3,1744,2050,0,300);
         mosh = constrain(mosh, 0, 255);
        
         mosh1 = mosh+right-left;
@@ -91,26 +91,26 @@ void loop(void)
          mosh2 = mosh-right+left;
          mosh2 = constrain(mosh2, 0, 255);        
         advance(mosh1,mosh2);
-        } else if(ch3 < 1672)  {
-            mosh = map(ch3,1240,1671,-300,0);
+        } else if(ch3 < 1622)  {
+            mosh = map(ch3,1240,1621,-300,0);
             mosh *=-1;
             mosh = constrain(mosh, 0, 255);
            
-             mosh1 = mosh+right-left;
-             mosh1 = constrain(mosh1, 0, 255);
-             mosh2 = mosh-right+left;
+             mosh2 = mosh+right-left;
              mosh2 = constrain(mosh2, 0, 255);
+             mosh1 = mosh-right+left;
+             mosh1 = constrain(mosh1, 0, 255);
             back_off (mosh1,mosh2);
           }  else {
             stop();
             }
 
-      if(ch1 > 1700) {
-        right = map(ch1,1701,2050,0,400);
+      if(ch1 > 1750) {
+        right = map(ch1,1751,2050,0,400);
         right = constrain(right, 0, 200);
         left = 0;
-        }else if(ch1 < 1682){
-          left = map(ch1,1200,1681,-400,0);
+        }else if(ch1 < 1632){
+          left = map(ch1,1200,1631,-400,0);
           left *=-1;
           left = constrain(left, 0, 200); 
           right = 0;         
