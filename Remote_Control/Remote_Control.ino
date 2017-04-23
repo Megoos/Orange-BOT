@@ -1,3 +1,7 @@
+#include <Servo.h> //используем библиотеку для работы с сервоприводом
+Servo servo; //объявляем переменную servo типа Servo
+
+
 //Standard PWM DC control
 int E1 = 5;     //M1 Speed Control
 int E2 = 6;     //M2 Speed Control
@@ -5,8 +9,8 @@ int M1 = 4;    //M1 Direction Control
 int M2 = 7;    //M1 Direction Control
 
 int but = 10; // кнопка пуска
-int but_L = 11; // левый бампер
-int but_R = 2; // правый бампер
+int but_L = A4; // левый бампер
+int but_R = A5; // правый бампер  свободен 11 - 2
 
 int Trig1 = 3;
 int Echo1 = 12;
@@ -19,7 +23,7 @@ int USensor (int Trig, int Echo){
   return (pulseIn(Echo, HIGH)/58); // Выводим на порт   
 }
 
-void stop(void)                    //Stop
+void stop(void) //Stop
 {
   digitalWrite(E1,LOW);   
   digitalWrite(E2,LOW);      
@@ -55,6 +59,7 @@ void turn_R (char a,char b)             //Turn Right
 
 void setup(void) 
 {   
+  servo.attach(2); //привязываем привод к порту 2
   for(int i = 4;i <= 7;i++)
     pinMode(i, OUTPUT);  
   Serial.begin(19200);      //Set Baud Rate
@@ -62,6 +67,7 @@ void setup(void)
   pinMode(but, OUTPUT); 
   pinMode(8, INPUT);
   pinMode(9, INPUT);
+  pinMode(11, INPUT); // pult rigth_up
   pinMode(Trig1, OUTPUT); //инициируем как выход 
   pinMode(Echo1, INPUT); //инициируем как вход   
   pinMode(but_L, INPUT); //инициируем как выход 
@@ -78,6 +84,8 @@ void loop(void)
   
   int ch3;//kurok left_ (up_down) min = 1240 ; max = 2050 ; avr = (1672-1693) // (1622-1743)
   int ch1;//kurok right (left_right) min = 1200 ; max = 2050 ; avr = (1682-1700) // (1632-1750)
+  int ch2; // 1350 - 1670
+  int ch2_old = 0;
    
  digitalWrite(but, HIGH); 
  while (digitalRead(but) == 1) {
@@ -87,6 +95,7 @@ void loop(void)
   Serial.println("Start!!!");
   while(digitalRead(but) == 1){
       ch3 = pulseIn(8, HIGH); // up_down 
+      ch2 = pulseIn(11, HIGH); // right_(up_down) 
       ch1 = pulseIn(9, HIGH); // each channel
       Serial.print("Chanel_3:");
       Serial.println(ch3);
@@ -135,6 +144,13 @@ void loop(void)
           left = 0;
           right = 0;
           }
+      // control servo    
+      ch2 = constrain(ch2,1350,1670);  
+      if ( abs(ch2-ch2_old) > 10){
+      ch2_old = ch2;
+      ch2 = map(ch2,1350,1670,40,140);
+      servo.write(ch2);
+      }    
   }
 Serial.println("End!");
 }
