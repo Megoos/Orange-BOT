@@ -1,5 +1,6 @@
 #include <Servo.h> //используем библиотеку для работы с сервоприводом
 Servo servo; //объявляем переменную servo типа Servo
+Servo servo2;
 
 
 //Standard PWM DC control
@@ -12,7 +13,7 @@ int but = 10; // кнопка пуска
 int but_L = A4; // левый бампер
 int but_R = A5; // правый бампер  свободен 11 - 2
 
-int Trig1 = 3;
+//int Trig1 = 3;
 int Echo1 = 12;
 
 int USensor (int Trig, int Echo){
@@ -60,16 +61,18 @@ void turn_R (char a,char b)             //Turn Right
 void setup(void) 
 {   
   servo.attach(2); //привязываем привод к порту 2
+  servo2.attach(12); //привязываем привод к порту 2
   for(int i = 4;i <= 7;i++)
     pinMode(i, OUTPUT);  
   Serial.begin(19200);      //Set Baud Rate
   Serial.println("Run keyboard control");
   pinMode(but, OUTPUT); 
   pinMode(8, INPUT);
+  pinMode(3, INPUT);
   pinMode(9, INPUT);
   pinMode(11, INPUT); // pult rigth_up
-  pinMode(Trig1, OUTPUT); //инициируем как выход 
-  pinMode(Echo1, INPUT); //инициируем как вход   
+ // pinMode(Trig1, OUTPUT); //инициируем как выход 
+ // pinMode(Echo1, INPUT); //инициируем как вход   
   pinMode(but_L, INPUT); //инициируем как выход 
   pinMode(but_R, INPUT); //инициируем как вход  
 } 
@@ -83,8 +86,10 @@ void loop(void)
   int right = 0;
   
   int ch3;//kurok left_ (up_down) min = 1240 ; max = 2050 ; avr = (1672-1693) // (1622-1743)
+  int ch4;//1310-1680...
+  int ch4_old = 0;
   int ch1;//kurok right (left_right) min = 1200 ; max = 2050 ; avr = (1682-1700) // (1632-1750)
-  int ch2; // 1350 - 1670
+  int ch2;// 1350 - 1670
   int ch2_old = 0;
    
  digitalWrite(but, HIGH); 
@@ -97,12 +102,13 @@ void loop(void)
       ch3 = pulseIn(8, HIGH); // up_down 
       ch2 = pulseIn(11, HIGH); // right_(up_down) 
       ch1 = pulseIn(9, HIGH); // each channel
-      Serial.print("Chanel_3:");
-      Serial.println(ch3);
-      Serial.print("Chanel_1:");
-      Serial.println(ch1);
+      ch4 = pulseIn(3, HIGH); // each channel
+      //Serial.print("Chanel_3:");
+     // Serial.println(ch3);
+      //Serial.print("Chanel_1:");
+     // Serial.println(ch1);
       
-      if ((ch3 > 1743) && (USensor(Trig1,Echo1) > 40) && (digitalRead(but_L)==1 && digitalRead(but_R)==1)){
+      if ((ch3 > 1743) && (digitalRead(but_L)==1 && digitalRead(but_R)==1)){
         mosh = map(ch3,1744,2050,0,300);
         mosh = constrain(mosh, 0, 255);
        flag = false;
@@ -122,7 +128,7 @@ void loop(void)
              mosh1 = constrain(mosh1, 0, 255);
             back_off (mosh1,mosh2);
           }  else {
-            if ((USensor(Trig1,Echo1) > 15)){
+            if (true){
               if (right > 0){
                 turn_R(10+right, 10+right); 
                 }else if(left > 0){
@@ -146,11 +152,22 @@ void loop(void)
           }
       // control servo    
       ch2 = constrain(ch2,1350,1670);  
-      if ( abs(ch2-ch2_old) > 10){
+      if ( abs(ch2-ch2_old) > 15){
       ch2_old = ch2;
-      ch2 = map(ch2,1350,1670,40,140);
-      servo.write(ch2);
+      ch2 = map(ch2,1350,1670,40,110);
+      if (ch2 <=111 && ch2 >= 39){
+      servo.write(ch2);}
       }    
+
+      ch4 = constrain(ch4,1310,1680);  
+      if ( abs(ch4-ch4_old) > 8){
+      ch4_old = ch4;
+      ch4 = map(ch4,1310,1680,85,108);
+      if (ch4 <=108 && ch4 >= 85){
+      servo2.write(ch4);
+      delay(10);
+      }
+      }
   }
 Serial.println("End!");
 }
